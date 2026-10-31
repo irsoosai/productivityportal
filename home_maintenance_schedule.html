@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Home Maintenance Schedule</title>
+<!-- Home Maintenance Schedule - rev 2 (rev 1 + GitHub Contents API sync, conflict merge, version history) -->
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --line2:#eef0f3; --text:#1f2328; --mute:#6a717b;
+  --blue:#1f6fb8; --blue-d:#185a96; --green:#2e9e48; --orange:#ef8b10; --red:#dc3535;
+  --gray:#b9c0c9; --empty:#eef0f3; --hl:#eef5fd; --cur:#f1f6fc;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}
+header h1{font-size:19px;font-weight:600;margin:0 auto 0 0}
+.btn{border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f3f5f7}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pri:hover{background:var(--blue-d)}
+.btn.danger{color:var(--red);border-color:#f0c4c4}
+.btn.danger:hover{background:#fdf0f0}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:default}
+.sync{font-size:12px;color:var(--mute);border:1px dashed var(--line);border-radius:5px;padding:5px 9px;white-space:nowrap}
+main{padding:14px 16px 24px}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:#fff;cursor:pointer;font-size:13px}
+.pill.over{background:#fdecec;border-color:#fdecec;color:#c62828}
+.pill.soon{background:#fff1de;border-color:#fff1de;color:#a35a00}
+.pill.ok{background:#e6f4ea;border-color:#e6f4ea;color:#1e7a35}
+.pill.on{box-shadow:0 0 0 2px var(--blue) inset}
+.bar .sp{flex:1}
+select.sel{border:1px solid var(--line);border-radius:5px;padding:5px 8px;background:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1180px}
+th,td{padding:0 8px;height:31px;border-bottom:1px solid var(--line2);white-space:nowrap}
+thead th{font-size:12px;font-weight:600;color:#4b525b;height:27px;background:#fafbfc;border-bottom:1px solid var(--line);text-align:center}
+thead th.l{text-align:left;padding-left:12px}
+th.mh{width:50px}
+th.mh.cur{color:var(--blue);background:var(--cur)}
+th.mh small{display:block;font-size:9px;font-weight:400;color:var(--mute);line-height:1;margin-top:-2px}
+tr.cat td{background:#f6f7f9;font-weight:600;font-size:13px;height:28px;padding-left:12px}
+tr.cat td span{font-weight:400;color:var(--mute);margin-left:6px}
+tr.sub td{background:#fafbfc;font-size:11px;font-weight:600;color:#5c636c;height:26px;padding-left:24px}
+tr.task{cursor:pointer}
+tr.task:hover td{background:#f8fafc}
+tr.task.sel td{background:var(--hl)}
+tr.task td{text-align:center}
+tr.task td.nm{text-align:left;padding-left:24px;color:var(--blue)}
+tr.task td.nm.sg{padding-left:24px}
+td.m{padding:0 6px}
+td.m.cur{background:var(--cur)}
+tr.task.sel td.m.cur{background:#e4effb}
+.b{height:8px;border-radius:2px;background:var(--empty)}
+.b.done{background:var(--green)}
+.b.soon{background:var(--orange)}
+.b.over{background:var(--red)}
+.b.sched{background:#fff;border:1px solid var(--gray)}
+.chip{display:inline-block;font-size:11.5px;border-radius:4px;padding:1px 6px;line-height:16px}
+.chip.over{background:#fdecec;color:#c62828}
+.chip.soon{background:#fff1de;color:#a35a00}
+.chip.ok{background:#e6f4ea;color:#1e7a35}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+.detail{border-top:2px solid var(--blue);display:grid;grid-template-columns:minmax(420px,1.3fr) 1fr 1fr;gap:20px;padding:14px 16px 16px}
+.detail h3{margin:0 0 3px;font-size:15px}
+.detail .meta{color:var(--mute);font-size:12.5px;margin-bottom:12px}
+.detail .acts{display:flex;gap:6px;flex-wrap:wrap}
+.detail h4{margin:0 0 6px;font-size:12.5px;font-weight:600;color:#4b525b}
+.form-inline{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:8px;background:#f8f9fb;border:1px solid var(--line2);border-radius:5px}
+.form-inline input[type=text]{flex:1;min-width:120px}
+input.in,select.in,textarea.in{border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff}
+.hist{max-height:150px;overflow:auto;border-top:1px solid var(--line2)}
+.hrow{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line2);padding:3px 0;font-size:12.5px}
+.hrow .d{width:96px;flex:none}
+.hrow input{flex:1;min-width:0;border:1px solid transparent;background:transparent;text-align:right;color:var(--mute);padding:2px 4px;border-radius:3px}
+.hrow input:hover,.hrow input:focus{border-color:var(--line);background:#fff;outline:none}
+.hrow .x{border:0;background:none;color:#a0a6ae;cursor:pointer;padding:0 3px;font-size:15px;line-height:1}
+.hrow .x:hover{color:var(--red)}
+.tag{font-size:10.5px;border-radius:3px;padding:0 4px;background:#eceff3;color:#5c636c}
+.detail textarea.notes{width:100%;height:64px;resize:vertical}
+.nohist{color:var(--mute);font-size:12.5px;padding:6px 0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--mute);align-items:center}
+.legend i{display:inline-block;width:14px;height:7px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.legend .sp{flex:1}
+.linkbtn{border:0;background:none;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
+.linkbtn:hover{color:var(--red)}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(20,25,30,.35);display:flex;align-items:flex-start;justify-content:center;padding:6vh 12px;z-index:20;overflow:auto}
+.mod{background:#fff;border-radius:8px;width:100%;max-width:560px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.mod h2{font-size:16px;margin:0;padding:14px 18px;border-bottom:1px solid var(--line)}
+.mod .bd{padding:14px 18px}
+.mod .ft{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.mod .ft .sp{flex:1}
+.fld{margin-bottom:12px}
+.fld>label{display:block;font-size:12px;font-weight:600;color:#4b525b;margin-bottom:4px}
+.fld .in{width:100%}
+.row2{display:flex;gap:10px}
+.row2>.fld{flex:1}
+.mgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.mgrid label{display:flex;align-items:center;gap:4px;font-size:12.5px;border:1px solid var(--line);border-radius:4px;padding:3px 6px;cursor:pointer}
+.radios{display:flex;gap:14px;margin-bottom:8px}
+.radios label{display:flex;gap:5px;align-items:center;cursor:pointer}
+.hint{font-size:11.5px;color:var(--mute);margin-top:4px}
+.catbox{border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-bottom:8px}
+.catbox .top{display:flex;gap:6px;align-items:center}
+.catbox .top input{flex:1}
+.subs{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;align-items:center}
+.sgchip{display:inline-flex;align-items:center;gap:3px;background:#f1f3f6;border-radius:4px;padding:2px 3px 2px 7px;font-size:12px}
+.sgchip button{border:0;background:none;cursor:pointer;color:#8a9099;font-size:14px;line-height:1}
+.sgchip button:hover{color:var(--red)}
+.subs input{width:150px;padding:2px 6px;font-size:12px}
+.err{color:var(--red);font-size:12.5px;margin-top:6px}
+/* toast */
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#24292f;color:#fff;border-radius:6px;padding:8px 12px;font-size:13px;display:flex;gap:12px;align-items:center;z-index:30;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.toast button{background:none;border:0;color:#8cc4ff;cursor:pointer;font-weight:600;padding:0}
+/* sync */
+button.sync{background:#fff;cursor:pointer;font-family:inherit}
+.sync.ok{border-style:solid;border-color:#bfe3c8;color:#1e7a35;background:#f3fbf5}
+.sync.pending,.sync.syncing{border-style:solid;border-color:#f5d5a6;color:#8a4b00;background:#fff8ee}
+.sync.offline{border-style:solid;color:#5c636c;background:#f3f4f6}
+.sync.conflict,.sync.error{border-style:solid;border-color:#f0c4c4;color:#b42323;background:#fdf3f3}
+.mod.wide{max-width:800px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-14px -18px 14px;padding:0 12px}
+.tabs button{border:0;background:none;padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;color:var(--mute)}
+.tabs button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.msg{font-size:12.5px;padding:8px 10px;border-radius:5px;background:#f6f7f9;margin-top:10px;white-space:pre-wrap}
+.msg.ok{background:#e6f4ea;color:#1e7a35}.msg.bad{background:#fdecec;color:#b42323}.msg.warn{background:#fff1de;color:#8a4b00}
+table.mini{min-width:0;width:100%}
+table.mini th{text-align:left;font-size:11.5px;color:#4b525b;font-weight:600;border-bottom:1px solid var(--line);height:26px;padding:0 6px}
+table.mini td{height:auto;padding:5px 6px;font-size:12.5px;white-space:normal;vertical-align:top}
+table.mini td.nw{white-space:nowrap}
+.cl{max-height:52vh;overflow:auto}
+.guide{font-size:13px}
+.guide ol{padding-left:20px;margin:0}.guide li{margin-bottom:8px}.guide ul{padding-left:18px;margin:4px 0}
+.guide h4{margin:14px 0 6px;font-size:13px}
+code{background:#f1f3f6;padding:1px 4px;border-radius:3px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:6px}
+@media (max-width:900px){.detail{grid-template-columns:1fr}}
+@media print{header .btn,.bar select,.detail,.legend .linkbtn{display:none}.scroll{overflow:visible}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Home Maintenance Schedule</h1>
+  <button class="btn pri" id="bAdd">Add task</button>
+  <button class="btn" id="bCats">Categories</button>
+  <button class="btn" id="bExpJ">Export JSON</button>
+  <button class="btn" id="bImp">Import JSON / CSV</button>
+  <button class="btn" id="bExpC">Export CSV</button>
+  <button class="sync" id="sync" title="GitHub sync status - click for settings and history">Local only</button>
+  <button class="btn" id="bSync">Sync now</button>
+  <button class="btn" id="bGh">GitHub...</button>
+</header>
+<main>
+  <div class="bar">
+    <span id="pills"></span>
+    <span class="sp"></span>
+    <select class="sel" id="fCat"></select>
+    <select class="sel" id="fSort">
+      <option value="due">Sort: next due</option>
+      <option value="status">Sort: status</option>
+      <option value="name">Sort: name</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="scroll"><table id="tbl"></table></div>
+    <div id="detail"></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--green)"></i>Done</span>
+    <span><i style="background:var(--orange)"></i>Due within 30 days</span>
+    <span><i style="background:var(--red)"></i>Overdue</span>
+    <span><i style="background:#fff;border:1px solid var(--gray)"></i>Scheduled</span>
+    <span>* = seasonal (active months only)</span>
+    <span class="sp"></span>
+    <span id="saved"></span>
+  </div>
+</main>
+<input type="file" id="fileIn" accept=".json,.csv,application/json,text/csv" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- constants / helpers ---------- */
+var KEY = 'hms.data.v1';
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DOT = ' \u00b7 ';
+var T;                      // today (local midnight), refreshed each render
+var state, sel = null, fCat = 'all', fStat = 'all', sortBy = 'due', undoSnap = null, toastTimer = null;
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function pad(n){ return (n < 10 ? '0' : '') + n; }
+function uid(){ return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function today(){ var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+function pd(s){
+  if (!s) return null;
+  var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(s).trim());
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(s).trim());   // M/D/YYYY from Excel CSV
+  if (m) return new Date(+m[3], +m[1] - 1, +m[2]);
+  return null;
+}
+function fd(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function dim(y, m){ return new Date(y, m + 1, 0).getDate(); }
+function addDays(d, n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+function addMonths(d, n){
+  var t = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  return new Date(t.getFullYear(), t.getMonth(), Math.min(d.getDate(), dim(t.getFullYear(), t.getMonth())));
+}
+function days(a, b){ return Math.round((b - a) / 864e5); }
+function mIdx(d){ return (d.getFullYear() - T.getFullYear()) * 12 + d.getMonth() - T.getMonth(); }
+function show(d){
+  if (!d) return '&mdash;';
+  return MON[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== T.getFullYear() ? ', ' + d.getFullYear() : '');
+}
+function showFull(d){ return d ? MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() : '&mdash;'; }
+function monthList(a){ return a.map(function(m){ return MON[m - 1]; }).join(', '); }
+function seasonText(a){
+  if (!a || !a.length || a.length === 12) return '';
+  var s = a.slice().sort(function(x, y){ return x - y; });
+  var contiguous = s.every(function(v, i){ return i === 0 || v === s[i - 1] + 1; });
+  return contiguous ? MON[s[0] - 1] + '-' + MON[s[s.length - 1] - 1] : monthList(s);
+}
+
+/* ---------- schedule logic ---------- */
+function hasSeason(t){ return t.mode === 'interval' && t.season && t.season.length && t.season.length < 12; }
+function seasonAdj(t, d){
+  if (!hasSeason(t) || t.season.indexOf(d.getMonth() + 1) >= 0) return d;
+  for (var k = 1; k <= 12; k++){
+    var c = new Date(d.getFullYear(), d.getMonth() + k, 1);
+    if (t.season.indexOf(c.getMonth() + 1) >= 0) return c;
+  }
+  return d;
+}
+function fixedFrom(t, y, m0, kStart){
+  if (!t.months || !t.months.length) return null;
+  for (var k = kStart; k <= 36; k++){
+    var c = new Date(y, m0 + k, 1);
+    if (t.months.indexOf(c.getMonth() + 1) >= 0)
+      return new Date(c.getFullYear(), c.getMonth(), Math.min(t.day || 15, dim(c.getFullYear(), c.getMonth())));
+  }
+  return null;
+}
+// next occurrence after a base date (base = last done or last skipped due date)
+function nextAfter(t, b){
+  if (t.mode === 'fixed') return fixedFrom(t, b.getFullYear(), b.getMonth(), 1);  // a completion satisfies its own month
+  var n = t.unit === 'wk' ? addDays(b, 7 * (t.every || 1)) : addMonths(b, t.every || 1);
+  return seasonAdj(t, n);
+}
+function maxDate(t, type){
+  var best = null;
+  (t.history || []).forEach(function(h){
+    if (type && h.t !== type) return;
+    var d = pd(h.d); if (d && (!best || d > best)) best = d;
+  });
+  return best;
+}
+function lastDone(t){ return maxDate(t, 'done'); }
+function baseDate(t){ return maxDate(t, null); }
+function nextDue(t){
+  var b = baseDate(t);
+  if (b) return nextAfter(t, b);
+  if (t.mode === 'fixed') return fixedFrom(t, T.getFullYear(), T.getMonth(), 0);
+  return seasonAdj(t, T);                     // never done: due now
+}
+function intervalDays(t){
+  if (t.mode === 'fixed') return 365;
+  return t.unit === 'wk' ? 7 * (t.every || 1) : 30.4 * (t.every || 1);
+}
+// 30-day "due soon" window; short intervals (< 60 d) scale to 1/4 interval so they are not permanently "due soon"
+function soonWin(t){ var i = intervalDays(t); return i < 60 ? Math.max(1, Math.round(i / 4)) : 30; }
+function status(t, nd){
+  if (!nd) return 'ok';
+  var dd = days(T, nd);
+  return dd < 0 ? 'over' : (dd <= soonWin(t) ? 'soon' : 'ok');
+}
+var RANK = {over: 4, soon: 3, done: 2, sched: 1};
+function strip(t, nd, st){
+  var cells = new Array(12).fill(''), end = new Date(T.getFullYear(), T.getMonth() + 12, 1);
+  function put(i, c){ if (i >= 0 && i < 12 && (!cells[i] || RANK[c] > RANK[cells[i]])) cells[i] = c; }
+  if (nd){
+    put(Math.max(0, mIdx(nd)), st === 'over' ? 'over' : st === 'soon' ? 'soon' : 'sched');
+    var d = st === 'over' ? nextAfter(t, T) : nextAfter(t, nd), g = 0;  // project as if done today when overdue
+    while (d && d < end && g++ < 80){ put(mIdx(d), 'sched'); d = nextAfter(t, d); }
+  }
+  (t.history || []).forEach(function(h){
+    var d = pd(h.d); if (h.t === 'done' && d && mIdx(d) === 0) put(0, 'done');
+  });
+  return cells;
+}
+function everyText(t){
+  if (t.mode === 'fixed') return monthList((t.months || []).slice().sort(function(a, b){ return a - b; })) || '&mdash;';
+  var n = t.every || 1, s;
+  if (t.unit === 'wk') s = n === 1 ? 'weekly' : n + ' wk';
+  else s = n + ' mo';
+  return s + (hasSeason(t) ? '*' : '');
+}
+function everyLong(t){
+  if (t.mode === 'fixed') return 'each ' + monthList((t.months || []).slice().sort(function(a, b){ return a - b; })) + ' (day ' + (t.day || 15) + ')';
+  var n = t.every || 1, u = t.unit === 'wk' ? 'week' : 'month';
+  return 'every ' + (n === 1 ? u : n + ' ' + u + 's') + (hasSeason(t) ? ', ' + seasonText(t.season) + ' only' : '');
+}
+
+/* ---------- data ---------- */
+function seed(){
+  var cats = [
+    {name: 'Furnace', subs: []},
+    {name: 'AC', subs: []},
+    {name: 'Water systems', subs: ['Filter', 'Softening system', 'Water heater', 'RO system']},
+    {name: 'Lawn care', subs: []}
+  ];
+  function I(name, cat, sub, every, last, extra){
+    var t = {id: uid(), name: name, cat: cat, sub: sub, mode: 'interval', every: every, unit: 'mo',
+      season: [], months: [], day: 15, notes: '', history: last ? [{d: last, t: 'done', n: ''}] : []};
+    return Object.assign(t, extra || {});
+  }
+  function F(name, cat, months, day, last){
+    return {id: uid(), name: name, cat: cat, sub: '', mode: 'fixed', every: 12, unit: 'mo', season: [],
+      months: months, day: day, notes: '', history: last ? [{d: last, t: 'done', n: ''}] : []};
+  }
+  var tasks = [
+    I('Replace furnace air filter', 'Furnace', '', 3, '2026-07-28'),
+    I('Annual furnace tune-up', 'Furnace', '', 12, '2025-11-03'),
+    I('Test CO and smoke detectors', 'Furnace', '', 6, '2026-09-14'),
+    I('Flush condensate drain line', 'AC', '', 3, '2026-09-02'),
+    I('Clean condenser coil', 'AC', '', 12, '2026-04-10'),
+    I('Annual AC tune-up', 'AC', '', 12, '2026-04-18'),
+    I('Whole-house sediment filter', 'Water systems', 'Filter', 3, '2026-08-20'),
+    I('Refill softener salt', 'Water systems', 'Softening system', 1, '2026-09-25'),
+    I('Clean brine tank / resin cleaner', 'Water systems', 'Softening system', 6, '2026-05-02'),
+    I('Water heater flush', 'Water systems', 'Water heater', 12, null, {history: [
+      {d: '2025-11-12', t: 'done', n: 'Flushed 3 gal, light sediment'},
+      {d: '2024-11-03', t: 'done', n: 'Replaced drain valve'}]}),
+    I('Check anode rod', 'Water systems', 'Water heater', 24, '2024-11-03'),
+    I('Replace RO pre-filters', 'Water systems', 'RO system', 6, '2026-06-05'),
+    I('Replace RO membrane', 'Water systems', 'RO system', 24, '2025-01-09'),
+    I('Sanitize RO tank', 'Water systems', 'RO system', 12, '2026-01-09'),
+    I('Mow and edge', 'Lawn care', '', 1, '2026-10-26', {unit: 'wk', season: [3,4,5,6,7,8,9,10,11]}),
+    F('Fertilize', 'Lawn care', [3, 6, 9], 15, '2026-09-20'),
+    F('Pre-emergent weed control', 'Lawn care', [2, 9], 15, '2026-09-08'),
+    I('Sprinkler system check', 'Lawn care', '', 1, '2026-08-30'),
+    F('Winterize sprinkler backflow', 'Lawn care', [11], 20, '2025-11-20'),
+    I('Aerate lawn', 'Lawn care', '', 12, '2026-05-15'),
+    I('Trim trees and shrubs', 'Lawn care', '', 6, '2026-07-01')
+  ];
+  return {app: 'home-maintenance-schedule', version: 1, updated: new Date().toISOString(), categories: cats, tasks: tasks};
+}
+function normTask(t){
+  var o = {
+    id: t.id || uid(), name: String(t.name || 'Untitled').trim(), cat: String(t.cat || 'Uncategorized').trim(),
+    sub: String(t.sub || '').trim(), mode: t.mode === 'fixed' ? 'fixed' : 'interval',
+    every: Math.max(1, parseInt(t.every, 10) || 1), unit: t.unit === 'wk' ? 'wk' : 'mo',
+    season: (t.season || []).map(Number).filter(function(m){ return m >= 1 && m <= 12; }),
+    months: (t.months || []).map(Number).filter(function(m){ return m >= 1 && m <= 12; }),
+    day: Math.min(31, Math.max(1, parseInt(t.day, 10) || 15)), notes: String(t.notes || ''),
+    history: (t.history || []).filter(function(h){ return h && pd(h.d); }).map(function(h){
+      return {d: fd(pd(h.d)), t: h.t === 'skip' ? 'skip' : 'done', n: String(h.n || '')}; })
+  };
+  if (o.mode === 'fixed' && !o.months.length) o.months = [1];
+  return o;
+}
+function normalize(d){
+  d = d && typeof d === 'object' ? d : {};
+  var out = {app: 'home-maintenance-schedule', version: 1, updated: d.updated || new Date().toISOString(),
+    categories: [], tasks: []};
+  (d.categories || []).forEach(function(c){
+    if (c && c.name && !findCat(out, c.name)) out.categories.push({name: String(c.name).trim(), subs: (c.subs || []).map(String)});
+  });
+  (d.tasks || []).forEach(function(t){ out.tasks.push(normTask(t)); });
+  out.tasks.forEach(function(t){ ensureCat(out, t.cat, t.sub); });
+  return out;
+}
+function findCat(s, name){
+  var k = String(name).toLowerCase();
+  return s.categories.filter(function(c){ return c.name.toLowerCase() === k; })[0] || null;
+}
+function ensureCat(s, name, sub){
+  var c = findCat(s, name);
+  if (!c){ c = {name: name, subs: []}; s.categories.push(c); }
+  if (sub && c.subs.indexOf(sub) < 0) c.subs.push(sub);
+  return c;
+}
+function getTask(id){ return state.tasks.filter(function(t){ return t.id === id; })[0] || null; }
+
+function load(){
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) {}
+  if (raw){ try { return normalize(JSON.parse(raw)); } catch (e) {} }
+  return seed();
+}
+function persist(){
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    $('saved').textContent = 'Saved on this browser ' + new Date().toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+  } catch (e) { $('saved').textContent = 'Could not save to browser storage'; }
+}
+// every mutation goes through commit(); msg becomes the GitHub commit message in rev 2
+function snapshot(){ return JSON.stringify(state); }
+function commit(msg, snap){
+  state.updated = new Date().toISOString();
+  persist();
+  noteEdit(msg);
+  if (snap) toast(msg, snap);
+  render();
+}
+
+/* ---------- render ---------- */
+function render(){
+  T = today();
+  var rows = state.tasks.map(function(t){ var nd = nextDue(t); return {t: t, nd: nd, st: status(t, nd)}; });
+  var c = {all: rows.length, over: 0, soon: 0, ok: 0};
+  rows.forEach(function(r){ c[r.st]++; });
+
+  $('pills').innerHTML =
+    pill('all', c.all + ' tasks', '') + ' ' + pill('over', c.over + ' overdue', 'over') + ' ' +
+    pill('soon', c.soon + ' due in 30 days', 'soon') + ' ' + pill('ok', c.ok + ' up to date', 'ok');
+
+  var opts = '<option value="all">All categories</option>' + state.categories.map(function(k){
+    return '<option value="' + esc(k.name) + '"' + (fCat === k.name ? ' selected' : '') + '>' + esc(k.name) + '</option>'; }).join('');
+  if (fCat !== 'all' && !findCat(state, fCat)) fCat = 'all';
+  $('fCat').innerHTML = opts; $('fCat').value = fCat;
+
+  var vis = rows.filter(function(r){
+    return (fCat === 'all' || r.t.cat === fCat) && (fStat === 'all' || r.st === fStat); });
+  var SR = {over: 0, soon: 1, ok: 2};
+  vis.sort(function(a, b){
+    if (sortBy === 'name') return a.t.name.localeCompare(b.t.name);
+    if (sortBy === 'status' && SR[a.st] !== SR[b.st]) return SR[a.st] - SR[b.st];
+    return (a.nd ? +a.nd : 9e15) - (b.nd ? +b.nd : 9e15) || a.t.name.localeCompare(b.t.name);
+  });
+
+  var h = '<thead><tr><th class="l" style="width:28%">Task</th><th style="width:78px">Every</th>' +
+    '<th style="width:104px">Last done</th><th style="width:104px">Next due</th><th style="width:96px">Status</th>';
+  for (var i = 0; i < 12; i++){
+    var md = new Date(T.getFullYear(), T.getMonth() + i, 1);
+    h += '<th class="mh' + (i === 0 ? ' cur' : '') + '" title="' + MON[md.getMonth()] + ' ' + md.getFullYear() + '">' +
+      MON[md.getMonth()] + (md.getMonth() === 0 && i > 0 ? '<small>' + md.getFullYear() + '</small>' : '') + '</th>';
+  }
+  h += '</tr></thead><tbody>';
+
+  var any = false;
+  state.categories.forEach(function(k){
+    var inCat = vis.filter(function(r){ return r.t.cat === k.name; });
+    if (!inCat.length) return;
+    any = true;
+    var total = state.tasks.filter(function(t){ return t.cat === k.name; }).length;
+    h += '<tr class="cat"><td colspan="17">' + esc(k.name) + '<span>' + total + ' task' + (total === 1 ? '' : 's') + '</span></td></tr>';
+    var groups = [''].concat(k.subs);
+    inCat.forEach(function(r){ if (groups.indexOf(r.t.sub) < 0) groups.push(r.t.sub); });
+    groups.forEach(function(g){
+      var gr = inCat.filter(function(r){ return r.t.sub === g; });
+      if (!gr.length) return;
+      if (g) h += '<tr class="sub"><td colspan="17">' + esc(g) + '</td></tr>';
+      gr.forEach(function(r){ h += rowHtml(r); });
+    });
+  });
+  if (!any) h += '<tr><td colspan="17" class="empty">' +
+    (state.tasks.length ? 'No tasks match this filter.' : 'No tasks yet. Use Add task to create one.') + '</td></tr>';
+  $('tbl').innerHTML = h + '</tbody>';
+  renderDetail();
+}
+function pill(k, txt, cls){
+  return '<button class="pill ' + cls + (fStat === k ? ' on' : '') + '" data-stat="' + k + '">' + txt + '</button>';
+}
+var CHIP = {over: 'Overdue', soon: 'Due soon', ok: 'Up to date'};
+function rowHtml(r){
+  var t = r.t, cells = strip(t, r.nd, r.st), ld = lastDone(t);
+  var h = '<tr class="task' + (sel === t.id ? ' sel' : '') + '" data-id="' + t.id + '">' +
+    '<td class="nm">' + esc(t.name) + '</td>' +
+    '<td' + (hasSeason(t) ? ' title="Active ' + esc(seasonText(t.season)) + '"' : '') + '>' + everyText(t) + '</td>' +
+    '<td>' + show(ld) + '</td><td>' + show(r.nd) + '</td>' +
+    '<td><span class="chip ' + r.st + '">' + CHIP[r.st] + '</span></td>';
+  cells.forEach(function(c, i){ h += '<td class="m' + (i === 0 ? ' cur' : '') + '"><div class="b ' + c + '"></div></td>'; });
+  return h + '</tr>';
+}
+var doneFormOpen = false;
+function renderDetail(){
+  var t = sel && getTask(sel), el = $('detail');
+  if (!t){ el.innerHTML = ''; doneFormOpen = false; return; }
+  var nd = nextDue(t), st = status(t, nd);
+  var hist = (t.history || []).map(function(h, i){ return {h: h, i: i}; })
+    .sort(function(a, b){ return a.h.d < b.h.d ? 1 : a.h.d > b.h.d ? -1 : 0; });
+  var h = '<div class="detail"><div>' +
+    '<h3>' + esc(t.name) + '</h3>' +
+    '<div class="meta">' + esc(t.cat) + (t.sub ? ' / ' + esc(t.sub) : '') + DOT + esc(everyLong(t)) + DOT +
+      'next due ' + showFull(nd) + DOT + '<span class="chip ' + st + '">' + CHIP[st] + '</span></div>' +
+    '<div class="acts">' +
+      '<button class="btn pri" data-act="today">Mark done today</button>' +
+      '<button class="btn" data-act="ondate">Done on date...</button>' +
+      '<button class="btn" data-act="skip" title="Skip the cycle due ' + esc(fd(nd || T)) + '">Skip this cycle</button>' +
+      '<button class="btn" data-act="edit">Edit task</button>' +
+    '</div>' +
+    (doneFormOpen ? '<div class="form-inline"><input class="in" type="date" id="dDate" value="' + fd(T) + '" max="' + fd(T) + '">' +
+      '<input class="in" type="text" id="dNote" placeholder="Note (optional)" maxlength="200">' +
+      '<button class="btn pri sm" data-act="saveDone">Save</button><button class="btn sm" data-act="cancelDone">Cancel</button></div>' : '') +
+    '</div><div><h4>History</h4><div class="hist">' +
+    (hist.length ? hist.map(function(x){
+      var d = pd(x.h.d);
+      return '<div class="hrow"><span class="d">' + showFull(d) + '</span>' +
+        (x.h.t === 'skip' ? '<span class="tag">skipped</span>' : '') +
+        '<input data-hi="' + x.i + '" value="' + esc(x.h.n) + '" placeholder="add note" maxlength="200">' +
+        '<button class="x" data-del="' + x.i + '" title="Remove entry">&times;</button></div>';
+    }).join('') : '<div class="nohist">No completions recorded yet.</div>') +
+    '</div></div><div><h4>Notes</h4><textarea class="in notes" id="tNotes" placeholder="Model, size, part numbers, vendor...">' +
+    esc(t.notes) + '</textarea></div></div>';
+  el.innerHTML = h;
+  if (doneFormOpen){ var n = $('dNote'); if (n) n.focus(); }
+}
+
+/* ---------- actions ---------- */
+function markDone(t, dateStr, note){
+  var snap = snapshot();
+  t.history.push({d: dateStr, t: 'done', n: note || ''});
+  doneFormOpen = false;
+  commit('Done: ' + t.name, snap);
+}
+function skipCycle(t){
+  var nd = nextDue(t) || T, snap = snapshot();
+  t.history.push({d: fd(nd), t: 'skip', n: ''});
+  commit('Skip: ' + t.name + ' (' + fd(nd) + ')', snap);
+}
+$('detail').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  var t = getTask(sel); if (!t) return;
+  var a = b.getAttribute('data-act');
+  if (a === 'today') markDone(t, fd(T), '');
+  else if (a === 'ondate'){ doneFormOpen = true; renderDetail(); }
+  else if (a === 'cancelDone'){ doneFormOpen = false; renderDetail(); }
+  else if (a === 'saveDone'){
+    var d = pd($('dDate').value);
+    if (!d){ $('dDate').focus(); return; }
+    if (d > T){ alert('Completion date cannot be in the future.'); return; }
+    markDone(t, fd(d), $('dNote').value.trim());
+  }
+  else if (a === 'skip') skipCycle(t);
+  else if (a === 'edit') editTask(t);
+  else if (b.hasAttribute('data-del')){
+    var i = +b.getAttribute('data-del'), h = t.history[i], snap = snapshot();
+    t.history.splice(i, 1);
+    commit('Remove history: ' + t.name + ' ' + h.d, snap);
+  }
+});
+$('detail').addEventListener('keydown', function(e){
+  if (e.key === 'Enter' && (e.target.id === 'dNote' || e.target.id === 'dDate')){
+    var s = document.querySelector('[data-act=saveDone]'); if (s) s.click();
+  }
+});
+$('detail').addEventListener('change', function(e){
+  var t = getTask(sel); if (!t) return;
+  if (e.target.id === 'tNotes'){ t.notes = e.target.value; commit('Notes: ' + t.name); }
+  else if (e.target.hasAttribute('data-hi')){
+    var h = t.history[+e.target.getAttribute('data-hi')];
+    if (h){ h.n = e.target.value.trim(); commit('History note: ' + t.name); }
+  }
+});
+$('tbl').addEventListener('click', function(e){
+  var tr = e.target.closest('tr.task'); if (!tr) return;
+  var id = tr.getAttribute('data-id');
+  sel = sel === id ? null : id; doneFormOpen = false;
+  render();
+  if (sel) $('detail').scrollIntoView({block: 'nearest', behavior: 'smooth'});
+});
+$('pills').addEventListener('click', function(e){
+  var b = e.target.closest('[data-stat]'); if (!b) return;
+  var k = b.getAttribute('data-stat'); fStat = (fStat === k || k === 'all') ? 'all' : k; render();
+});
+$('fCat').addEventListener('change', function(){ fCat = this.value; render(); });
+$('fSort').addEventListener('change', function(){ sortBy = this.value; render(); });
+
+/* ---------- modal ---------- */
+function modal(title, body, foot){
+  closeModal();
+  var ov = document.createElement('div');
+  ov.className = 'ov'; ov.id = 'ov';
+  ov.innerHTML = '<div class="mod" role="dialog" aria-label="' + esc(title) + '"><h2>' + esc(title) + '</h2><div class="bd">' + body +
+    '</div><div class="ft">' + foot + '</div></div>';
+  ov.addEventListener('mousedown', function(e){ if (e.target === ov) closeModal(); });
+  document.body.appendChild(ov);
+  return ov;
+}
+function closeModal(){ var o = $('ov'); if (o) o.remove(); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+
+function monthBoxes(selArr){
+  return '<div class="mgrid">' + MON.map(function(m, i){
+    return '<label><input type="checkbox" value="' + (i + 1) + '"' + (selArr.indexOf(i + 1) >= 0 ? ' checked' : '') + '>' + m + '</label>';
+  }).join('') + '</div>';
+}
+function editTask(t){
+  var isNew = !t;
+  var d = t || {name: '', cat: fCat !== 'all' ? fCat : (state.categories[0] || {name: ''}).name, sub: '', mode: 'interval',
+    every: 3, unit: 'mo', season: [], months: [], day: 15, notes: '', history: []};
+  var catOpts = state.categories.map(function(c){
+    return '<option' + (c.name === d.cat ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') +
+    '<option value="__new">+ New category...</option>';
+  var body =
+    '<div class="fld"><label>Task name</label><input class="in" id="eName" value="' + esc(d.name) + '" maxlength="120"></div>' +
+    '<div class="row2"><div class="fld"><label>Category</label><select class="in" id="eCat">' + catOpts + '</select></div>' +
+    '<div class="fld"><label>Sub-group</label><select class="in" id="eSub"></select></div></div>' +
+    '<div class="fld"><label>Schedule</label><div class="radios">' +
+      '<label><input type="radio" name="eMode" value="interval"' + (d.mode !== 'fixed' ? ' checked' : '') + '>Repeat interval</label>' +
+      '<label><input type="radio" name="eMode" value="fixed"' + (d.mode === 'fixed' ? ' checked' : '') + '>Fixed months</label></div>' +
+      '<div id="eInt" class="row2" style="align-items:center"><span>Every</span>' +
+        '<input class="in" id="eEvery" type="number" min="1" max="120" value="' + d.every + '" style="width:80px">' +
+        '<select class="in" id="eUnit" style="width:110px"><option value="mo"' + (d.unit !== 'wk' ? ' selected' : '') + '>months</option>' +
+        '<option value="wk"' + (d.unit === 'wk' ? ' selected' : '') + '>weeks</option></select></div>' +
+      '<div id="eFix" class="row2" style="align-items:center"><span>Due on day</span>' +
+        '<input class="in" id="eDay" type="number" min="1" max="31" value="' + d.day + '" style="width:80px"><span>of each selected month</span></div>' +
+    '</div>' +
+    '<div class="fld"><label id="eMonLbl"></label><div id="eMon"></div><div class="hint" id="eMonHint"></div></div>' +
+    '<div class="fld"><label>Notes</label><textarea class="in" id="eNotes" rows="3">' + esc(d.notes) + '</textarea></div>' +
+    (isNew ? '<div class="fld"><label>Last done (optional)</label><input class="in" type="date" id="eLast" max="' + fd(T) + '" style="width:180px"></div>' : '') +
+    '<div class="err" id="eErr"></div>';
+  var foot = (isNew ? '' : '<button class="btn danger" id="eDel">Delete task</button>') +
+    '<span class="sp"></span><button class="btn" id="eCancel">Cancel</button><button class="btn pri" id="eSave">' + (isNew ? 'Add task' : 'Save') + '</button>';
+  modal(isNew ? 'Add task' : 'Edit task', body, foot);
+
+  var monSel = {interval: (d.season || []).slice(), fixed: (d.months || []).slice()};
+  var curMode = d.mode === 'fixed' ? 'fixed' : 'interval';
+  function readMon(){ return [].slice.call($('eMon').querySelectorAll('input:checked')).map(function(x){ return +x.value; }); }
+  function syncMode(){
+    $('eInt').style.display = curMode === 'interval' ? 'flex' : 'none';
+    $('eFix').style.display = curMode === 'fixed' ? 'flex' : 'none';
+    $('eMonLbl').textContent = curMode === 'fixed' ? 'Due in months' : 'Active season (optional)';
+    $('eMonHint').textContent = curMode === 'fixed' ? 'Task is due once in each checked month.' :
+      'Leave all unchecked for year-round. If checked, due dates falling outside the season move to the start of the next active month.';
+    $('eMon').innerHTML = monthBoxes(monSel[curMode]);
+  }
+  function fillSubs(){
+    var c = findCat(state, $('eCat').value), cur = $('eSub').value || d.sub;
+    $('eSub').innerHTML = '<option value="">(none)</option>' + (c ? c.subs : []).map(function(s){
+      return '<option' + (s === cur ? ' selected' : '') + '>' + esc(s) + '</option>'; }).join('') +
+      '<option value="__new">+ New sub-group...</option>';
+  }
+  $('eCat').addEventListener('change', function(){
+    if (this.value === '__new'){
+      var n = (prompt('New category name') || '').trim();
+      if (n){ ensureCat(state, n); this.insertAdjacentHTML('afterbegin', '<option>' + esc(n) + '</option>'); this.value = findCat(state, n).name; }
+      else this.value = state.categories.length ? state.categories[0].name : '';
+    }
+    fillSubs();
+  });
+  $('eSub').addEventListener('change', function(){
+    if (this.value !== '__new') return;
+    var n = (prompt('New sub-group name') || '').trim(), c = findCat(state, $('eCat').value);
+    if (n && c){ if (c.subs.indexOf(n) < 0) c.subs.push(n); d.sub = n; } else this.value = '';
+    fillSubs(); if (n) $('eSub').value = n;
+  });
+  [].forEach.call(document.querySelectorAll('input[name=eMode]'), function(r){
+    r.addEventListener('change', function(){ monSel[curMode] = readMon(); curMode = this.value; syncMode(); });
+  });
+  $('eCancel').onclick = closeModal;
+  if (!isNew) $('eDel').onclick = function(){
+    if (!confirm('Delete "' + t.name + '" and its history?')) return;
+    var snap = snapshot();
+    state.tasks = state.tasks.filter(function(x){ return x.id !== t.id; });
+    sel = null; closeModal(); commit('Delete task: ' + t.name, snap);
+  };
+  $('eSave').onclick = function(){
+    monSel[curMode] = readMon();
+    var name = $('eName').value.trim(), cat = $('eCat').value, sub = $('eSub').value;
+    if (sub === '__new') sub = '';
+    if (!name){ $('eErr').textContent = 'Task name is required.'; return; }
+    if (!cat || cat === '__new'){ $('eErr').textContent = 'Pick a category.'; return; }
+    if (curMode === 'fixed' && !monSel.fixed.length){ $('eErr').textContent = 'Check at least one month.'; return; }
+    var dup = state.tasks.filter(function(x){ return x.name.toLowerCase() === name.toLowerCase() && (!t || x.id !== t.id); });
+    if (dup.length){ $('eErr').textContent = 'A task with this name already exists (names are used for merge-import).'; return; }
+    var snap = snapshot(), target = t || {id: uid(), history: []};
+    var upd = normTask({id: target.id, name: name, cat: cat, sub: sub, mode: curMode,
+      every: $('eEvery').value, unit: $('eUnit').value, season: curMode === 'interval' ? monSel.interval : (t ? t.season : []),
+      months: curMode === 'fixed' ? monSel.fixed : (t ? t.months : []), day: $('eDay').value, notes: $('eNotes').value,
+      history: target.history});
+    if (isNew && $('eLast').value) upd.history.push({d: $('eLast').value, t: 'done', n: ''});
+    ensureCat(state, upd.cat, upd.sub);
+    if (isNew){ state.tasks.push(upd); sel = upd.id; }
+    else Object.assign(t, upd);
+    closeModal(); commit((isNew ? 'Add task: ' : 'Edit task: ') + upd.name, snap);
+  };
+  fillSubs(); syncMode();
+  setTimeout(function(){ $('eName').focus(); }, 0);
+}
+$('bAdd').onclick = function(){ editTask(null); };
+
+/* ---------- categories ---------- */
+function manageCats(){
+  function body(){
+    return state.categories.map(function(c, ci){
+      var n = state.tasks.filter(function(t){ return t.cat === c.name; }).length;
+      return '<div class="catbox"><div class="top"><input class="in" data-ren="' + ci + '" value="' + esc(c.name) + '">' +
+        '<span class="hint" style="margin:0 6px">' + n + ' task' + (n === 1 ? '' : 's') + '</span>' +
+        '<button class="btn sm" data-up="' + ci + '"' + (ci === 0 ? ' disabled' : '') + ' title="Move up">Up</button>' +
+        '<button class="btn sm danger" data-delc="' + ci + '"' + (n ? ' disabled title="Move or delete its tasks first"' : '') + '>Delete</button></div>' +
+        '<div class="subs">' + c.subs.map(function(s, si){
+          return '<span class="sgchip">' + esc(s) + '<button data-dels="' + ci + ':' + si + '" title="Remove sub-group">&times;</button></span>';
+        }).join('') + '<input class="in" data-adds="' + ci + '" placeholder="+ sub-group, Enter"></div></div>';
+    }).join('') +
+    '<div class="row2" style="align-items:center;margin-top:10px"><input class="in" id="cNew" placeholder="New category name" style="flex:1">' +
+    '<button class="btn" id="cAdd">Add category</button></div>' +
+    '<div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn sm danger" id="cClear">Clear all completion history</button>' +
+    '<button class="btn sm danger" id="cReset">Reset to starter tasks</button></div>';
+  }
+  var ov = modal('Categories and sub-groups', body(), '<button class="btn pri" id="cDone">Done</button>');
+  function redraw(){ ov.querySelector('.bd').innerHTML = body(); }
+  ov.querySelector('#cDone').onclick = closeModal;
+  var bd = ov.querySelector('.bd');
+  bd.addEventListener('change', function(e){
+    var i = e.target.getAttribute('data-ren'); if (i == null) return;
+    var c = state.categories[+i], old = c.name, nn = e.target.value.trim();
+    if (!nn || (nn.toLowerCase() !== old.toLowerCase() && findCat(state, nn))){ e.target.value = old; return; }
+    c.name = nn;
+    state.tasks.forEach(function(t){ if (t.cat === old) t.cat = nn; });
+    if (fCat === old) fCat = nn;
+    commit('Rename category: ' + old + ' -> ' + nn); redraw();
+  });
+  bd.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    var i = e.target.getAttribute('data-adds');
+    if (i != null){
+      var v = e.target.value.trim(), c = state.categories[+i];
+      if (v && c.subs.indexOf(v) < 0){ c.subs.push(v); commit('Add sub-group: ' + c.name + ' / ' + v); redraw();
+        var nx = bd.querySelector('[data-adds="' + i + '"]'); if (nx) nx.focus(); }
+    } else if (e.target.id === 'cNew') bd.querySelector('#cAdd').click();
+  });
+  bd.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.id === 'cAdd'){
+      var v = bd.querySelector('#cNew').value.trim();
+      if (v && !findCat(state, v)){ state.categories.push({name: v, subs: []}); commit('Add category: ' + v); redraw(); }
+    } else if (b.hasAttribute('data-up')){
+      var i = +b.getAttribute('data-up'), a = state.categories;
+      var tmp = a[i - 1]; a[i - 1] = a[i]; a[i] = tmp; commit('Reorder categories'); redraw();
+    } else if (b.hasAttribute('data-delc')){
+      var c = state.categories[+b.getAttribute('data-delc')], snap = snapshot();
+      state.categories.splice(+b.getAttribute('data-delc'), 1); commit('Delete category: ' + c.name, snap); redraw();
+    } else if (b.hasAttribute('data-dels')){
+      var p = b.getAttribute('data-dels').split(':'), cc = state.categories[+p[0]], s = cc.subs[+p[1]];
+      var n = state.tasks.filter(function(t){ return t.cat === cc.name && t.sub === s; }).length;
+      if (n && !confirm(n + ' task(s) in "' + s + '" will move to the ungrouped part of ' + cc.name + '. Continue?')) return;
+      var snap2 = snapshot();
+      state.tasks.forEach(function(t){ if (t.cat === cc.name && t.sub === s) t.sub = ''; });
+      cc.subs.splice(+p[1], 1); commit('Remove sub-group: ' + cc.name + ' / ' + s, snap2); redraw();
+    } else if (b.id === 'cClear'){
+      if (!confirm('Remove every completion and skip record from all tasks? (Export JSON first if you want a backup.)')) return;
+      var snap3 = snapshot();
+      state.tasks.forEach(function(t){ t.history = []; }); commit('Clear all history', snap3); closeModal();
+    } else if (b.id === 'cReset'){
+      if (!confirm('Replace ALL tasks and categories with the starter set?')) return;
+      var snap4 = snapshot(); state = seed(); sel = null; commit('Reset to starter tasks', snap4); closeModal();
+    }
+  });
+}
+$('bCats').onclick = manageCats;
+
+/* ---------- export ---------- */
+function download(name, text, type){
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type: type}));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function stamp(){ return fd(new Date()); }
+$('bExpJ').onclick = function(){
+  download('home_maintenance_' + stamp() + '.json', JSON.stringify(state, null, 2), 'application/json');
+};
+var CSV_COLS = ['category', 'subgroup', 'task', 'schedule_type', 'every', 'unit', 'months', 'day', 'last_done', 'next_due', 'status', 'notes'];
+function csvCell(v){ v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+$('bExpC').onclick = function(){
+  T = today();
+  var lines = [CSV_COLS.join(',')];
+  state.categories.forEach(function(c){
+    state.tasks.filter(function(t){ return t.cat === c.name; }).forEach(function(t){
+      var nd = nextDue(t), ld = lastDone(t);
+      var mon = t.mode === 'fixed' ? t.months : t.season;
+      lines.push([t.cat, t.sub, t.name, t.mode, t.mode === 'fixed' ? '' : t.every, t.mode === 'fixed' ? '' : t.unit,
+        mon.slice().sort(function(a, b){ return a - b; }).map(function(m){ return MON[m - 1]; }).join(';'),
+        t.mode === 'fixed' ? t.day : '', ld ? fd(ld) : '', nd ? fd(nd) : '', CHIP[status(t, nd)], t.notes].map(csvCell).join(','));
+    });
+  });
+  download('home_maintenance_' + stamp() + '.csv', '\ufeff' + lines.join('\r\n') + '\r\n', 'text/csv');
+};
+
+/* ---------- import ---------- */
+function parseCSV(s){
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < s.length; i++){
+    var c = s[i];
+    if (q){ if (c === '"'){ if (s[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ','){ row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r'){ if (c === '\r' && s[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f !== '' || row.length){ row.push(f); rows.push(row); }
+  return rows.filter(function(r){ return r.some(function(x){ return x.trim() !== ''; }); });
+}
+function parseMonths(s){
+  return String(s || '').split(/[;|\s\/]+/).map(function(x){
+    x = x.trim(); if (!x) return 0;
+    if (/^\d+$/.test(x)) return +x;
+    var i = MON.map(function(m){ return m.toLowerCase(); }).indexOf(x.slice(0, 3).toLowerCase());
+    return i + 1;
+  }).filter(function(m){ return m >= 1 && m <= 12; });
+}
+function csvToData(text){
+  var rows = parseCSV(text);
+  if (rows.length < 2) throw new Error('CSV has no data rows.');
+  var hd = rows[0].map(function(h){ return h.trim().toLowerCase().replace(/\s+/g, '_'); });
+  function col(r, n){ var i = hd.indexOf(n); return i >= 0 ? (r[i] || '').trim() : ''; }
+  if (hd.indexOf('task') < 0) throw new Error('CSV needs a "task" column. Expected: ' + CSV_COLS.join(', '));
+  var cats = [], tasks = [];
+  rows.slice(1).forEach(function(r){
+    var name = col(r, 'task'); if (!name) return;
+    var mode = /fix/i.test(col(r, 'schedule_type')) ? 'fixed' : 'interval', mon = parseMonths(col(r, 'months'));
+    var unit = /^w/i.test(col(r, 'unit')) ? 'wk' : 'mo', ld = pd(col(r, 'last_done'));
+    var cat = col(r, 'category') || 'Uncategorized', sub = col(r, 'subgroup');
+    if (!cats.some(function(c){ return c.name === cat; })) cats.push({name: cat, subs: []});
+    tasks.push({name: name, cat: cat, sub: sub, mode: mode, every: col(r, 'every') || 1, unit: unit,
+      season: mode === 'interval' ? mon : [], months: mode === 'fixed' ? mon : [], day: col(r, 'day') || 15,
+      notes: col(r, 'notes'), history: ld ? [{d: fd(ld), t: 'done', n: 'Imported'}] : []});
+  });
+  return normalize({categories: cats, tasks: tasks});
+}
+function mergeInto(base, inc){
+  var added = 0, updated = 0;
+  inc.categories.forEach(function(c){ var k = ensureCat(base, c.name); c.subs.forEach(function(s){ if (k.subs.indexOf(s) < 0) k.subs.push(s); }); });
+  inc.tasks.forEach(function(t){
+    var ex = base.tasks.filter(function(x){ return x.id === t.id; })[0] ||
+      base.tasks.filter(function(x){ return x.name.toLowerCase() === t.name.toLowerCase(); })[0];
+    if (!ex){ base.tasks.push(t); added++; return; }
+    var keep = ex.history, id = ex.id;
+    Object.assign(ex, t, {id: id, history: keep});
+    t.history.forEach(function(h){
+      var dupe = keep.some(function(k){ return k.d === h.d && k.t === h.t; });
+      if (!dupe) keep.push(h);
+    });
+    ensureCat(base, ex.cat, ex.sub); updated++;
+  });
+  return {added: added, updated: updated};
+}
+$('bImp').onclick = function(){
+  var body = '<div class="fld"><label>File (.json from Export JSON, or .csv)</label>' +
+    '<input type="file" id="iFile" accept=".json,.csv,application/json,text/csv"></div>' +
+    '<div class="fld"><label>Mode</label><div class="radios">' +
+    '<label><input type="radio" name="iMode" value="merge" checked>Merge by task name</label>' +
+    '<label><input type="radio" name="iMode" value="replace">Replace all</label></div>' +
+    '<div class="hint">Merge: matching names are updated and their history combined; new names are added; nothing is deleted. ' +
+    'CSV carries last done only (one history entry per task).</div></div>' +
+    '<div class="hint">CSV columns: ' + CSV_COLS.join(', ') + ' (next_due and status are ignored on import).</div>' +
+    '<div class="err" id="iErr"></div>';
+  modal('Import JSON / CSV', body, '<button class="btn" id="iCancel">Cancel</button><button class="btn pri" id="iGo">Import</button>');
+  $('iCancel').onclick = closeModal;
+  $('iGo').onclick = function(){
+    var f = $('iFile').files[0];
+    if (!f){ $('iErr').textContent = 'Choose a file first.'; return; }
+    var mode = document.querySelector('input[name=iMode]:checked').value;
+    var rd = new FileReader();
+    rd.onload = function(){
+      var text = String(rd.result).replace(/^\ufeff/, ''), inc;
+      try {
+        if (/\.json$/i.test(f.name) || /^\s*[\[{]/.test(text)){
+          var j = JSON.parse(text);
+          inc = normalize(Array.isArray(j) ? {tasks: j} : j);
+        } else inc = csvToData(text);
+      } catch (err){ $('iErr').textContent = 'Could not read file: ' + err.message; return; }
+      if (!inc.tasks.length){ $('iErr').textContent = 'No tasks found in file.'; return; }
+      var snap = snapshot(), msg;
+      if (mode === 'replace'){
+        if (!confirm('Replace all ' + state.tasks.length + ' tasks with ' + inc.tasks.length + ' from the file?')) return;
+        state = inc; sel = null; msg = 'Import (replace): ' + inc.tasks.length + ' tasks from ' + f.name;
+      } else {
+        var r = mergeInto(state, inc);
+        msg = 'Import (merge) ' + f.name + ': ' + r.added + ' added, ' + r.updated + ' updated';
+      }
+      closeModal(); commit(msg, snap);
+    };
+    rd.readAsText(f);
+  };
+};
+
+/* ---------- toast / undo ---------- */
+function toast(msg, snap){
+  undoSnap = snap || null;
+  var old = document.querySelector('.toast'); if (old) old.remove();
+  var d = document.createElement('div'); d.className = 'toast';
+  d.innerHTML = '<span>' + esc(msg) + '</span>' + (snap ? '<button>Undo</button>' : '');
+  if (snap) d.querySelector('button').onclick = function(){
+    if (!undoSnap) return;
+    state = normalize(JSON.parse(undoSnap)); undoSnap = null;
+    if (sel && !getTask(sel)) sel = null;
+    d.remove(); commit('Undo: ' + msg);
+  };
+  document.body.appendChild(d);
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ d.remove(); }, 6000);
+}
+
+/* ---------- GitHub sync (Contents API) ---------- */
+var GHKEY = 'hms.gh.v1', TOKKEY = 'hms.gh.token', SYNCKEY = 'hms.sync.v1', DEBOUNCE_MS = 5000;
+var gh, sync, syncState = 'local', syncErr = '', debTimer = null, editSeq = 0, inflight = false, again = false;
+var lastPull = 0, conflictRemote = null;
+
+function stGet(store, k){ try { return JSON.parse(store.getItem(k) || 'null'); } catch (e) { return null; } }
+function stSet(store, k, v){ try { if (v == null) store.removeItem(k); else store.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function loadGh(){
+  var g = stGet(localStorage, GHKEY) || {};
+  g.owner = g.owner || ''; g.repo = g.repo || ''; g.branch = g.branch || 'main';
+  g.path = g.path || 'data/home_maintenance.json'; g.remember = g.remember !== false;
+  g.token = (g.remember ? stGet(localStorage, TOKKEY) : stGet(sessionStorage, TOKKEY)) || '';
+  return g;
+}
+function saveGh(){
+  stSet(localStorage, GHKEY, {owner: gh.owner, repo: gh.repo, branch: gh.branch, path: gh.path, remember: gh.remember});
+  stSet(localStorage, TOKKEY, gh.remember && gh.token ? gh.token : null);
+  stSet(sessionStorage, TOKKEY, !gh.remember && gh.token ? gh.token : null);
+}
+function cfgKey(g){ g = g || gh; return [g.owner, g.repo, g.branch, g.path].join('|').toLowerCase(); }
+function loadSync(){
+  var s = stGet(localStorage, SYNCKEY) || {};
+  s.sha = s.sha || null; s.dirty = !!s.dirty; s.msgs = s.msgs || []; s.last = s.last || null;
+  if (s.key !== cfgKey()) { s.sha = null; s.key = cfgKey(); }
+  return s;
+}
+function saveSync(){ sync.key = cfgKey(); stSet(localStorage, SYNCKEY, sync); }
+function configured(){ return !!(gh.owner && gh.repo && gh.branch && gh.path && gh.token); }
+
+function b64enc(str){
+  var bytes = new TextEncoder().encode(str), s = '';
+  for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function b64dec(b){
+  var s = atob(String(b).replace(/\s/g, '')), u = new Uint8Array(s.length);
+  for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+  return new TextDecoder().decode(u);
+}
+function repoUrl(g, p){ return 'https://api.github.com/repos/' + encodeURIComponent(g.owner) + '/' + encodeURIComponent(g.repo) + (p || ''); }
+function contentsUrl(g, ref){
+  return repoUrl(g, '/contents/' + g.path.replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/')) +
+    (ref ? '?ref=' + encodeURIComponent(ref) : '');
+}
+function api(g, url, opt){
+  opt = opt || {};
+  opt.cache = 'no-store';
+  opt.headers = Object.assign({'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + g.token}, opt.headers || {});
+  return fetch(url, opt).then(function(r){
+    return r.text().then(function(txt){
+      var j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
+      if (!r.ok){ var err = new Error((j && j.message) || ('HTTP ' + r.status)); err.status = r.status; throw err; }
+      return j;
+    });
+  });
+}
+// returns {sha, data} or null when the file does not exist
+function fetchRemote(g, ref){
+  return api(g, contentsUrl(g, ref || g.branch)).then(function(j){
+    if (Array.isArray(j) || !j || j.type !== 'file') throw new Error('The file path points to a folder, not a file.');
+    var getText = j.content ? Promise.resolve(b64dec(j.content)) :
+      api(g, repoUrl(g, '/git/blobs/' + j.sha)).then(function(b){ return b64dec(b.content || ''); });
+    return getText.then(function(txt){
+      var d;
+      try { d = JSON.parse(txt); } catch (e) { throw new Error('The remote file is not valid JSON. Not overwriting it.'); }
+      if (!d || !Array.isArray(d.tasks)) throw new Error('The remote file is not Home Maintenance data. Not overwriting it.');
+      return {sha: j.sha, data: normalize(d)};
+    });
+  }, function(e){ if (e.status === 404) return null; throw e; });
+}
+function fetchBlob(sha){
+  return api(gh, repoUrl(gh, '/git/blobs/' + sha)).then(function(b){ return normalize(JSON.parse(b64dec(b.content || ''))); })
+    .catch(function(){ return null; });
+}
+function canon(d){ return JSON.stringify({c: d.categories, t: d.tasks}); }
+function same(a, b){ return canon(normalize(JSON.parse(JSON.stringify(a)))) === canon(normalize(JSON.parse(JSON.stringify(b)))); }
+function hhmm(iso){ return iso ? new Date(iso).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'}) : ''; }
+function dateTime(iso){
+  var d = new Date(iso);
+  return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' ' + hhmm(iso);
+}
+
+function setSync(s, err){ syncState = s; syncErr = err || ''; renderSync(); }
+function renderSync(){
+  var el = $('sync'), n = sync.msgs.length, txt, tip = '';
+  if (!configured()) { syncState = 'local'; }
+  switch (syncState){
+    case 'local': txt = 'Local only'; tip = 'Not connected to GitHub. Data is saved in this browser only.'; break;
+    case 'ok': txt = 'Synced ' + hhmm(sync.last); tip = 'All changes committed to ' + gh.owner + '/' + gh.repo; break;
+    case 'pending': txt = 'Unsynced changes'; tip = (n || 1) + ' change(s) will commit ~5 s after the last edit'; break;
+    case 'syncing': txt = 'Syncing...'; break;
+    case 'offline': txt = 'Offline - saved locally'; tip = 'Changes will sync when the connection returns'; break;
+    case 'conflict': txt = 'Conflict - resolve'; tip = 'GitHub has newer changes. Click to merge or reload.'; break;
+    default: txt = 'Sync error'; tip = syncErr;
+  }
+  el.className = 'sync ' + syncState;
+  el.textContent = txt; el.title = tip;
+}
+function commitMsg(msgs){
+  if (!msgs.length) return 'Update maintenance data';
+  if (msgs.length === 1) return msgs[0];
+  return msgs[msgs.length - 1] + ' (+' + (msgs.length - 1) + ' more)\n\n' + msgs.map(function(m){ return '- ' + m; }).join('\n');
+}
+// called by commit() for every local mutation
+function noteEdit(msg){
+  editSeq++;
+  sync.dirty = true;
+  if (msg && sync.msgs[sync.msgs.length - 1] !== msg) sync.msgs.push(msg);
+  if (sync.msgs.length > 50) sync.msgs = sync.msgs.slice(-50);
+  saveSync();
+  if (syncState === 'conflict') { renderSync(); return; }
+  schedule();
+}
+function schedule(){
+  clearTimeout(debTimer);
+  if (!configured()) { setSync('local'); return; }
+  if (!navigator.onLine) { setSync('offline'); return; }
+  setSync('pending');
+  debTimer = setTimeout(push, DEBOUNCE_MS);
+}
+function done(){ sync.last = new Date().toISOString(); saveSync(); setSync('ok'); }
+function fail(e){
+  if (e instanceof TypeError || !navigator.onLine){
+    setSync(navigator.onLine ? 'error' : 'offline', 'Network error: could not reach api.github.com');
+    return;
+  }
+  var m = e.message || String(e);
+  if (e.status === 401) m = 'Token rejected (401). It may be expired or mistyped - update it in GitHub... > Settings.';
+  else if (e.status === 403) m = 'Forbidden (403): ' + m + '. Check the token has Contents: Read and write on this repo.';
+  else if (e.status === 404) m = 'Not found (404): ' + m + '. Check owner, repo, branch and that the token can access the repo.';
+  setSync('error', m);
+}
+function adopt(r){
+  state = r.data; sync.sha = r.sha; sync.dirty = false; sync.msgs = [];
+  if (sel && !getTask(sel)) sel = null;
+  persist(); saveSync(); render();
+}
+// pull: load latest from GitHub; pushes when only local changed; raises conflict when both changed
+function pull(afterReject){
+  clearTimeout(debTimer);
+  if (!configured()) { setSync('local'); return Promise.resolve(); }
+  if (!navigator.onLine) { setSync('offline'); return Promise.resolve(); }
+  if (inflight) { again = true; return Promise.resolve(); }
+  inflight = true; setSync('syncing'); lastPull = Date.now();
+  return fetchRemote(gh).then(function(r){
+    inflight = false;
+    if (!r){
+      if (afterReject) return fail(afterReject);
+      sync.sha = null; sync.dirty = true; saveSync();                 // file not there yet: create it
+      if (!sync.msgs.length) sync.msgs.push('Create maintenance data file');
+      return push();
+    }
+    if (r.sha === sync.sha){
+      if (afterReject) return fail(afterReject);
+      return sync.dirty ? push() : done();
+    }
+    if (same(r.data, state)){ sync.sha = r.sha; sync.dirty = false; sync.msgs = []; return done(); }
+    if (!sync.dirty){ adopt(r); return done(); }
+    showConflict(r);
+  }, function(e){ inflight = false; fail(e); });
+}
+function push(){
+  clearTimeout(debTimer);
+  if (!configured()) { setSync('local'); return Promise.resolve(); }
+  if (syncState === 'conflict') return Promise.resolve();
+  if (!navigator.onLine) { setSync('offline'); return Promise.resolve(); }
+  if (inflight) { again = true; return Promise.resolve(); }
+  if (!sync.dirty && sync.sha) { done(); return Promise.resolve(); }
+  inflight = true; setSync('syncing');
+  var seq = editSeq, n = sync.msgs.length;
+  var req = {message: commitMsg(sync.msgs), content: b64enc(JSON.stringify(state, null, 2) + '\n'), branch: gh.branch};
+  if (sync.sha) req.sha = sync.sha;
+  return api(gh, contentsUrl(gh), {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(req)})
+    .then(function(j){
+      inflight = false;
+      sync.sha = j.content.sha; sync.msgs.splice(0, n);
+      sync.dirty = editSeq !== seq;          // edits made while the request was in flight
+      saveSync();
+      if (sync.dirty || again){ again = false; schedule(); } else done();
+    }, function(e){
+      inflight = false; again = false;
+      if (e.status === 409 || e.status === 422) return pull(e);   // sha mismatch: remote moved on
+      fail(e);
+    });
+}
+
+/* ----- 3-way merge: base = last synced version, mine = local, theirs = remote ----- */
+var FIELDS = ['name', 'cat', 'sub', 'mode', 'every', 'unit', 'season', 'months', 'day', 'notes'];
+function byId(a){ var o = {}; a.forEach(function(t){ o[t.id] = t; }); return o; }
+function hk(h){ return h.d + '|' + h.t; }
+function canonTask(t){
+  var c = JSON.parse(JSON.stringify(t));
+  c.history.sort(function(a, b){ return hk(a) < hk(b) ? -1 : hk(a) > hk(b) ? 1 : 0; });
+  return JSON.stringify(c);
+}
+function merge3(base, mine, theirs){
+  var out = JSON.parse(JSON.stringify(theirs));
+  var bT = byId(base ? base.tasks : []), mT = byId(mine.tasks), oT = byId(out.tasks), stats = {both: 0};
+  mine.tasks.forEach(function(m){
+    var b = bT[m.id], o = oT[m.id];
+    if (!o){
+      if (b && canonTask(m) === canonTask(b)) return;       // deleted remotely, untouched locally
+      out.tasks.push(JSON.parse(JSON.stringify(m))); return; // new locally (or edited locally after remote delete)
+    }
+    FIELDS.forEach(function(f){
+      var mv = JSON.stringify(m[f]);
+      if (!b){ o[f] = JSON.parse(mv); return; }
+      if (mv !== JSON.stringify(b[f])){
+        if (JSON.stringify(o[f]) !== JSON.stringify(b[f]) && JSON.stringify(o[f]) !== mv) stats.both++;
+        o[f] = JSON.parse(mv);                               // local edit wins
+      }
+    });
+    var hb = {}, hm = {}, res = [];
+    (b ? b.history : []).forEach(function(h){ hb[hk(h)] = h; });
+    m.history.forEach(function(h){ hm[hk(h)] = h; });
+    o.history.forEach(function(h){
+      var k = hk(h);
+      if (hb[k] && !hm[k]) return;                           // removed locally
+      if (hm[k] && (!hb[k] || hm[k].n !== hb[k].n)) h.n = hm[k].n;
+      res.push(h);
+    });
+    m.history.forEach(function(h){
+      var k = hk(h);
+      if (!hb[k] && !res.some(function(x){ return hk(x) === k; })) res.push(JSON.parse(JSON.stringify(h)));
+    });
+    o.history = res;
+  });
+  if (base){                                                  // deleted locally, untouched remotely
+    out.tasks = out.tasks.filter(function(o){
+      var b = bT[o.id];
+      return !(b && !mT[o.id] && canonTask(o) === canonTask(b));
+    });
+  }
+  mine.categories.forEach(function(c){
+    var k = ensureCat(out, c.name);
+    c.subs.forEach(function(s){ if (k.subs.indexOf(s) < 0) k.subs.push(s); });
+  });
+  if (base){
+    base.categories.forEach(function(c){
+      if (findCat(mine, c.name)) return;
+      if (out.tasks.some(function(t){ return t.cat.toLowerCase() === c.name.toLowerCase(); })) return;
+      out.categories = out.categories.filter(function(x){ return x.name.toLowerCase() !== c.name.toLowerCase(); });
+    });
+  }
+  var res = normalize(out); res.mergeStats = stats; return res;
+}
+
+function showConflict(r){
+  conflictRemote = r; setSync('conflict');
+  var list = sync.msgs.length ? sync.msgs.slice(-8).map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') +
+    (sync.msgs.length > 8 ? '<li>... ' + (sync.msgs.length - 8) + ' more</li>' : '') : '<li>(local edits)</li>';
+  var body =
+    '<p style="margin-top:0">The data file on GitHub changed since this browser last synced ' +
+    '(remote saved ' + esc(dateTime(r.data.updated)) + '), and this browser also has unsynced changes:</p>' +
+    '<ul style="margin:0 0 10px;font-size:12.5px">' + list + '</ul>' +
+    '<p><b>Nothing has been overwritten.</b> Choose how to resolve:</p>' +
+    '<p style="font-size:12.5px;margin:6px 0"><b>Merge and commit</b> - keeps the remote version and applies your local edits on top. ' +
+    'Completion histories from both sides are combined; if the same field was edited in both places, your local value wins.</p>' +
+    '<p style="font-size:12.5px;margin:6px 0"><b>Load remote</b> - discards this browser\'s unsynced changes. Download a backup first if unsure.</p>' +
+    '<div class="err" id="cfErr"></div>';
+  var ov = modal('Sync conflict', body,
+    '<button class="btn" id="cfLater">Decide later</button><button class="btn" id="cfDl">Download local JSON</button>' +
+    '<span class="sp"></span><button class="btn danger" id="cfRemote">Load remote</button>' +
+    '<button class="btn pri" id="cfMerge">Merge and commit</button>');
+  ov.querySelector('.mod').classList.add('wide');
+  ov.querySelector('#cfLater').onclick = closeModal;
+  ov.querySelector('#cfDl').onclick = function(){
+    download('home_maintenance_local_' + stamp() + '.json', JSON.stringify(state, null, 2), 'application/json');
+  };
+  ov.querySelector('#cfRemote').onclick = function(){
+    if (!confirm('Discard ' + (sync.msgs.length || 'all') + ' unsynced local change(s) and load the GitHub version?')) return;
+    closeModal(); conflictRemote = null; adopt(r); done(); toast('Loaded latest from GitHub');
+  };
+  ov.querySelector('#cfMerge').onclick = function(){
+    var btn = this; btn.disabled = true; btn.textContent = 'Merging...';
+    (sync.sha ? fetchBlob(sync.sha) : Promise.resolve(null)).then(function(base){
+      var merged = merge3(base, state, r.data), both = merged.mergeStats.both;
+      delete merged.mergeStats;
+      var snap = snapshot();
+      state = merged; sync.sha = r.sha; conflictRemote = null;
+      if (sel && !getTask(sel)) sel = null;
+      closeModal(); setSync('pending');
+      commit('Merge local changes' + (both ? ' (' + both + ' field(s) edited on both sides - kept local)' : ''), snap);
+      push();
+    });
+  };
+}
+
+/* ----- GitHub panel: settings / history / setup guide ----- */
+function ghPanel(tab){
+  var ov = modal('GitHub sync', '<div class="tabs">' +
+    '<button data-tab="settings">Settings</button><button data-tab="history">History</button><button data-tab="guide">Setup guide</button>' +
+    '</div><div id="ghBody"></div>', '<button class="btn" id="ghClose">Close</button>');
+  ov.querySelector('.mod').classList.add('wide');
+  ov.querySelector('#ghClose').onclick = closeModal;
+  var tabs = ov.querySelector('.tabs');
+  function go(t){
+    [].forEach.call(tabs.children, function(b){ b.classList.toggle('on', b.getAttribute('data-tab') === t); });
+    if (t === 'settings') ghSettings(); else if (t === 'history') ghHistory(); else ghGuide();
+  }
+  tabs.addEventListener('click', function(e){ var b = e.target.closest('[data-tab]'); if (b) go(b.getAttribute('data-tab')); });
+  go(tab || (configured() ? 'history' : 'settings'));
+}
+function fld(id, label, val, extra){
+  return '<div class="fld"><label for="' + id + '">' + label + '</label><input class="in" id="' + id + '" value="' + esc(val) + '"' + (extra || '') + '></div>';
+}
+function ghSettings(){
+  var b = $('ghBody');
+  b.innerHTML =
+    '<div class="row2">' + fld('gOwner', 'Owner (GitHub username or org)', gh.owner, ' autocomplete="off" spellcheck="false"') +
+      fld('gRepo', 'Private data repo', gh.repo, ' placeholder="home-data" autocomplete="off" spellcheck="false"') + '</div>' +
+    '<div class="row2">' + fld('gBranch', 'Branch', gh.branch, ' spellcheck="false"') +
+      fld('gPath', 'File path in repo', gh.path, ' spellcheck="false"') + '</div>' +
+    '<div class="fld"><label for="gTok">Fine-grained personal access token (Contents: Read and write, this repo only)</label>' +
+      '<input class="in" id="gTok" type="password" value="' + esc(gh.token) + '" autocomplete="off" spellcheck="false" placeholder="github_pat_...">' +
+      '<label class="chk"><input type="checkbox" id="gShow">Show token</label>' +
+      '<label class="chk"><input type="checkbox" id="gRem"' + (gh.remember ? ' checked' : '') + '>Remember token on this browser ' +
+      '(unchecked = forget when the tab closes)</label></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="gTest">Test connection</button>' +
+      '<button class="btn pri" id="gSave">Save and sync</button><span style="flex:1"></span>' +
+      '<button class="btn danger" id="gOff"' + (configured() ? '' : ' disabled') + '>Disconnect</button></div>' +
+    '<div id="gMsg"></div>' +
+    '<div class="hint" style="margin-top:12px">Settings and token are stored only in this browser (localStorage). ' +
+    'Status: ' + esc($('sync').textContent) + (syncErr ? ' - ' + esc(syncErr) : '') +
+    (sync.last ? '. Last sync ' + esc(dateTime(sync.last)) : '') + '.</div>';
+  function read(){
+    return {owner: $('gOwner').value.trim(), repo: $('gRepo').value.trim(), branch: $('gBranch').value.trim() || 'main',
+      path: $('gPath').value.trim().replace(/^\/+/, '') || 'data/home_maintenance.json', token: $('gTok').value.trim(),
+      remember: $('gRem').checked};
+  }
+  function msg(cls, txt){ $('gMsg').innerHTML = '<div class="msg ' + cls + '">' + esc(txt) + '</div>'; }
+  $('gShow').onchange = function(){ $('gTok').type = this.checked ? 'text' : 'password'; };
+  $('gTest').onclick = function(){
+    var g = read();
+    if (!g.owner || !g.repo || !g.token){ msg('bad', 'Owner, repo and token are required.'); return; }
+    msg('', 'Testing...');
+    api(g, repoUrl(g)).then(function(rp){
+      return fetchRemote(g).then(function(r){
+        var lines = ['Repo found: ' + rp.full_name + (rp['private'] ? ' (private)' : ' (PUBLIC)')];
+        if (r) lines.push('Data file found: ' + g.path + ' (' + r.data.tasks.length + ' tasks, saved ' + dateTime(r.data.updated) + ').');
+        else lines.push('Data file not found - it will be created on the first sync.');
+        if (!rp['private']) lines.push('WARNING: this repo is public, so anyone can read your data. Use a private repo.');
+        msg(rp['private'] ? 'ok' : 'warn', lines.join('\n'));
+      });
+    }).catch(function(e){
+      msg('bad', (e.status === 401 ? 'Token rejected (401).' : e.status === 404 ? 'Repo not found (404) - check owner/repo and that the token includes this repo.' :
+        e instanceof TypeError ? 'Network error - could not reach api.github.com.' : 'Error: ' + e.message));
+    });
+  };
+  $('gSave').onclick = function(){
+    var g = read();
+    if (!g.owner || !g.repo || !g.token){ msg('bad', 'Owner, repo and token are required.'); return; }
+    var changed = cfgKey(g) !== cfgKey();
+    gh = g; saveGh();
+    if (changed){ sync.sha = null; }
+    saveSync(); closeModal(); pull();
+  };
+  $('gOff').onclick = function(){
+    if (!confirm('Disconnect this browser from GitHub? The token is removed from this browser; data stays here and in the repo.')) return;
+    gh.token = ''; saveGh(); sync.sha = null; saveSync(); clearTimeout(debTimer); setSync('local'); ghSettings();
+  };
+}
+function ghHistory(){
+  var b = $('ghBody');
+  if (!configured()){ b.innerHTML = '<div class="msg">Connect to GitHub in Settings to see the commit history of the data file.</div>'; return; }
+  b.innerHTML = '<div class="msg">Loading commits...</div>';
+  api(gh, repoUrl(gh, '/commits?path=' + encodeURIComponent(gh.path) + '&sha=' + encodeURIComponent(gh.branch) + '&per_page=40'))
+    .then(function(list){
+      if (!list || !list.length){ b.innerHTML = '<div class="msg">No commits for ' + esc(gh.path) + ' yet.</div>'; return; }
+      b.innerHTML = '<div class="cl"><table class="mini"><thead><tr><th>When</th><th>Change</th><th>Commit</th><th></th></tr></thead><tbody>' +
+        list.map(function(c, i){
+          var m = c.commit.message.split('\n')[0];
+          return '<tr><td class="nw">' + esc(dateTime(c.commit.author.date)) + '</td><td>' + esc(m) +
+            (i === 0 ? ' <span class="chip ok">latest</span>' : '') + '</td><td class="nw"><code>' + c.sha.slice(0, 7) + '</code></td>' +
+            '<td class="nw"><button class="btn sm" data-view="' + i + '">View</button></td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="hint" style="margin-top:8px">Showing the last ' + list.length + ' commits that touched ' + esc(gh.path) +
+        '. Restoring writes the old version as a new commit, so nothing is lost.</div>';
+      b.onclick = function(e){
+        var v = e.target.closest('[data-view]'); if (!v) return;
+        viewVersion(list[+v.getAttribute('data-view')], +v.getAttribute('data-view') === 0);
+      };
+    }, function(e){ b.innerHTML = '<div class="msg bad">Could not load history: ' + esc(e.message) + '</div>'; });
+}
+function viewVersion(c, isLatest){
+  var b = $('ghBody'), when = dateTime(c.commit.author.date), short = c.sha.slice(0, 7);
+  b.onclick = null;
+  b.innerHTML = '<div class="msg">Loading version ' + short + '...</div>';
+  fetchRemote(gh, c.sha).then(function(r){
+    if (!r){ b.innerHTML = '<div class="msg bad">File not present in that commit.</div>'; return; }
+    T = today();
+    var cnt = {over: 0, soon: 0, ok: 0};
+    var rows = r.data.tasks.map(function(t){ var nd = nextDue(t), st = status(t, nd); cnt[st]++;
+      return '<tr><td>' + esc(t.cat) + (t.sub ? ' / ' + esc(t.sub) : '') + '</td><td>' + esc(t.name) + '</td><td class="nw">' + everyText(t) +
+        '</td><td class="nw">' + show(lastDone(t)) + '</td><td class="nw">' + show(nd) + '</td><td><span class="chip ' + st + '">' + CHIP[st] + '</span></td></tr>'; });
+    b.innerHTML = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">' +
+      '<button class="btn sm" id="vBack">&lt; Back</button><b>' + short + '</b><span class="hint" style="margin:0">' + esc(when) + DOT +
+      esc(c.commit.message.split('\n')[0]) + '</span></div>' +
+      '<div class="hint" style="margin-bottom:6px">' + r.data.tasks.length + ' tasks' + DOT + cnt.over + ' overdue' + DOT + cnt.soon + ' due soon' + DOT +
+      cnt.ok + ' up to date (statuses as of today)</div>' +
+      '<div class="cl"><table class="mini"><thead><tr><th>Category</th><th>Task</th><th>Every</th><th>Last done</th><th>Next due</th><th>Status</th></tr></thead><tbody>' +
+      rows.join('') + '</tbody></table></div>' +
+      '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="vDl">Download JSON</button><span style="flex:1"></span>' +
+      '<button class="btn pri" id="vRestore"' + (isLatest ? ' disabled title="This is the current version"' : '') + '>Restore this version</button></div>';
+    $('vBack').onclick = ghHistory;
+    $('vDl').onclick = function(){ download('home_maintenance_' + short + '.json', JSON.stringify(r.data, null, 2), 'application/json'); };
+    $('vRestore').onclick = function(){
+      if (syncState === 'conflict'){ alert('Resolve the sync conflict first (Sync now).'); return; }
+      if (!confirm('Restore version ' + short + ' (' + when + ')?' + (sync.dirty ? '\n\nUnsynced local changes in this browser will be replaced.' : '') +
+        '\n\nThis is saved as a new commit; the current version stays in history.')) return;
+      // base the restore commit on the current remote head so it is never rejected as stale
+      fetchRemote(gh).then(function(head){
+        var snap = snapshot();
+        state = JSON.parse(JSON.stringify(r.data)); sel = null;
+        if (head) sync.sha = head.sha;
+        sync.msgs = []; closeModal();
+        commit('Restore version ' + short + ' (' + when + ')', snap);
+        push();
+      }).catch(function(e){ alert('Could not restore: ' + e.message); });
+    };
+  }, function(e){ b.innerHTML = '<div class="msg bad">Could not load version: ' + esc(e.message) + '</div>'; });
+}
+function ghGuide(){
+  $('ghBody').innerHTML = '<div class="guide">' +
+  '<h4 style="margin-top:0">1. Create the private data repo</h4><ol>' +
+  '<li>On github.com click <b>+ &gt; New repository</b>.</li>' +
+  '<li>Name it, e.g. <code>home-data</code>. Choose <b>Private</b>. Tick <b>Add a README file</b> (this creates the <code>main</code> branch).</li>' +
+  '<li>Click <b>Create repository</b>.</li></ol>' +
+  '<h4>2. Create a fine-grained personal access token</h4><ol>' +
+  '<li>Avatar (top right) &gt; <b>Settings</b> &gt; <b>Developer settings</b> &gt; <b>Personal access tokens</b> &gt; <b>Fine-grained tokens</b> &gt; <b>Generate new token</b>.</li>' +
+  '<li>Token name: <code>home-maintenance</code>. Expiration: 90 days or 1 year (note the date to renew).</li>' +
+  '<li>Resource owner: your account. Repository access: <b>Only select repositories</b> &gt; pick <code>home-data</code>.</li>' +
+  '<li>Permissions &gt; Repository permissions &gt; <b>Contents: Read and write</b>. Metadata: Read-only is added automatically. Leave everything else at No access.</li>' +
+  '<li><b>Generate token</b> and copy it (starts with <code>github_pat_</code>). GitHub shows it only once.</li></ol>' +
+  '<h4>3. Connect this page</h4><ol>' +
+  '<li>Settings tab: Owner = your username, Repo = <code>home-data</code>, Branch = <code>main</code>, File path = <code>data/home_maintenance.json</code>, paste the token.</li>' +
+  '<li><b>Test connection</b>, then <b>Save and sync</b>. The first sync creates the file from this browser\'s data (folders in the path are created automatically).</li>' +
+  '<li>On another Mac, iPhone or browser: open the page and enter the same settings. If that browser has no local edits it loads the repo data.</li></ol>' +
+  '<h4>4. Publish the page</h4><ol>' +
+  '<li>Commit <code>home_maintenance_schedule.html</code> to your public GitHub Pages repo (e.g. next to your tools hub). The file holds no token and no data.</li></ol>' +
+  '<h4>How sync works</h4><ul>' +
+  '<li>Every edit saves to this browser immediately and is committed about 5 s after your last edit, with a message such as <code>Done: Water heater flush</code>.</li>' +
+  '<li>On open, and when the tab regains focus, the page loads the latest file. <b>Sync now</b> pulls and pushes immediately.</li>' +
+  '<li>Every write sends the file sha it was based on. If GitHub has a newer version, the write is refused and you choose <b>Merge</b> or <b>Load remote</b>. A newer remote is never overwritten.</li>' +
+  '<li>Offline edits stay in this browser and sync when the connection returns.</li>' +
+  '<li>History lists every commit of the data file. View any version, download it, or restore it as a new commit.</li></ul>' +
+  '<h4>Security notes</h4><ul>' +
+  '<li>The token is stored in this browser\'s localStorage for the Pages site\'s origin. All your Pages sites share <code>USERNAME.github.io</code>, so only host your own code there.</li>' +
+  '<li>The token can only read and write files in the one data repo. If a device is lost, revoke the token on the Fine-grained tokens page and create a new one.</li>' +
+  '<li>Uncheck <b>Remember token</b> on shared computers. The token is then forgotten when the tab closes.</li></ul></div>';
+}
+
+$('sync').onclick = function(){ if (syncState === 'conflict' && conflictRemote) showConflict(conflictRemote); else ghPanel(); };
+$('bGh').onclick = function(){ ghPanel(); };
+$('bSync').onclick = function(){
+  if (!configured()){ ghPanel('settings'); return; }
+  if (syncState === 'conflict'){ pull(); return; }        // re-check remote; re-opens conflict if still diverged
+  pull();
+};
+window.addEventListener('online', function(){ if (configured()) pull(); });
+window.addEventListener('offline', function(){ if (configured()) setSync('offline'); });
+// best-effort flush of pending edits when the page is closed (next open reconciles by content)
+window.addEventListener('pagehide', function(){
+  if (!configured() || !sync.dirty || inflight || syncState === 'conflict' || !navigator.onLine) return;
+  var req = {message: commitMsg(sync.msgs), content: b64enc(JSON.stringify(state, null, 2) + '\n'), branch: gh.branch};
+  if (sync.sha) req.sha = sync.sha;
+  var body = JSON.stringify(req);
+  if (body.length > 60000) return;
+  try {
+    fetch(contentsUrl(gh), {method: 'PUT', keepalive: true, headers: {'Accept': 'application/vnd.github+json',
+      'Authorization': 'Bearer ' + gh.token, 'Content-Type': 'application/json'}, body: body});
+  } catch (e) {}
+});
+
+/* ---------- start ---------- */
+gh = loadGh();
+sync = loadSync();
+state = load();
+persist();
+render();
+renderSync();
+if (configured()) pull();
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden || !configured() || inflight || syncState === 'conflict' || sync.dirty) return;
+  if (Date.now() - lastPull > 30000) pull();
+});
+// refresh statuses when the tab regains focus on a new day
+document.addEventListener('visibilitychange', function(){ if (!document.hidden && fd(today()) !== fd(T)) render(); });
+})();
+</script>
+</body>
+</html>
